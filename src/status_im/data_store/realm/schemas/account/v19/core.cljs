@@ -33,7 +33,7 @@
   (when-let [console-intro-message (some-> new-realm
                                            (.objects "message")
                                            (.filtered (str "message-id = \"intro-status\""))
-                                           (aget 0))] 
+                                           (aget 0))]
     (log/debug "v19 Removing console intro message " (pr-str console-intro-message))
     (.delete new-realm console-intro-message)))
 
@@ -138,13 +138,13 @@
   (some-> new-realm
           (.objects "user-status")
           (.map (fn [status _ _]
-                  (when-not (aget status "status-id") ;; orphaned status, delete
+                  (when-not (aget status "status-id") ;; orphaned statues, delete
                     (.delete new-realm status))))))
 
 (defn migration [old-realm new-realm]
   (log/debug "migrating v19 account database: " old-realm new-realm)
   (remove-contact! new-realm "transactor-personal")
-  (remove-contact! new-realm "transactor-group") 
+  (remove-contact! new-realm "transactor-group")
   (remove-console-intro-message! new-realm)
   (update-commands (juxt :bot :command) owner-command->new-props new-realm "command")
   (update-commands (juxt :command) console-requests->new-props new-realm "command-request")
