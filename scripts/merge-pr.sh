@@ -8,6 +8,11 @@ if [[ $# -eq 0 ]] ; then
     exit 0
 fi
 
+fatal() {
+  echo "FATAL: $@" >&2
+  exit 1
+}
+
 echo "[Merge PR from ${BRANCH}]"
 
 echo "[Update remote and checkout branch]"
@@ -16,6 +21,9 @@ git checkout -B $BRANCH origin/$BRANCH && git pull
 
 echo "[Rebase and squash to one commit (manual)]"
 git rebase -i origin/develop
+if [[ $(git rev-list $BRANCH..$PR_LOCAL_BRACNCH | wc -l) -ne 1 ]] ;then
+    fatal "Only squashed/single-commit PRs can be merged"
+fi
 
 echo "[Verify signature and commit (manual), update PR]"
 git show --show-signature
