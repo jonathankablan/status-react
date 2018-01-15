@@ -12,7 +12,7 @@
             [status-im.ui.components.react :as react]
             [status-im.ui.components.icons.vector-icons :as vector-icons]
             [status-im.ui.components.status-bar.view :refer [status-bar]]
-            [status-im.ui.components.styles :refer [color-blue]]
+            [status-im.ui.components.styles :refer [color-blue] :as component.styles]
             [status-im.ui.components.toolbar.actions :as actions]
             [status-im.ui.components.toolbar.view :as toolbar]
             [status-im.i18n :refer [label]]
@@ -29,9 +29,11 @@
   [toolbar/toolbar {}
    nil
    [toolbar/content-title ""]
-   [toolbar/actions
-    [(actions/opts [{:value #(dispatch [:my-profile/edit-profile])
-                     :text  (label :t/edit)}])]]])
+   [react/touchable-highlight
+    {:on-press #(dispatch [:my-profile/edit-profile])}
+    [react/view
+     [react/text {:style      styles/toolbar-edit-text
+                  :uppercase? component.styles/uppercase?} "Edit"]]]])
 
 (defn profile-toolbar [contact]
   [toolbar/toolbar {}
@@ -88,7 +90,7 @@
 (defn profile-info-item [{:keys [label value options text-mode empty-value? accessibility-label]}]
   [react/view styles/profile-setting-item
    [react/view (styles/profile-info-text-container options)
-    [react/text {:style styles/profile-setting-title}
+    [react/text {:style styles/profile-settings-title}
      label]
     [react/view styles/profile-setting-spacing]
     [react/text {:style               (if empty-value?
@@ -133,8 +135,8 @@
     :text-mode           :middle
     :accessibility-label :profile-public-key}])
 
-(defn info-item-separator []
-  [common/separator styles/info-item-separator])
+(defn settings-item-separator []
+  [common/separator styles/settings-item-separator])
 
 (defn tag-view [tag]
   [react/text {:style {:color color-blue}
@@ -160,28 +162,28 @@
                         :empty-value?        phone-empty?
                         :accessibility-label :profile-phone-number}]))
 
-(defn network-settings []
-  [react/touchable-highlight
-   {:on-press #(dispatch [:navigate-to :network-settings])}
-   [react/view styles/network-settings
-    [react/text {:style styles/network-settings-text}
-     (label :t/network-settings)]
-    [vector-icons/icon :icons/forward {:color :gray}]]])
+(defn settings-title [title]
+  [react/text {:style styles/profile-settings-title}
+   title])
 
-(defn offline-messaging-settings []
+(defn settings-item [label-kw value action-fn active?]
   [react/touchable-highlight
-   {:on-press #(dispatch [:navigate-to :offline-messaging-settings])}
-   [react/view styles/offline-messaging-settings
-    [react/text {:style styles/offline-messaging-settings-text}
-     (label :t/offline-messaging-settings)]
-    [vector-icons/icon :icons/forward {:color :gray}]]])
+   {:on-press action-fn
+    :disabled (not active?)}
+   [react/view styles/settings-item
+    [react/text {:style styles/settings-item-text}
+     (label label-kw)]
+    [react/text {:style      {:padding-right 10}
+                 :uppercase? component.styles/uppercase?} value]
+    (when active?
+      [vector-icons/icon :icons/forward {:color :gray}])]])
 
 (defn profile-info [{:keys [whisper-identity status phone] :as contact}]
   [react/view
    [profile-info-address-item contact]
-   [info-item-separator]
+   [settings-item-separator]
    [profile-info-public-key-item whisper-identity contact]
-   [info-item-separator]
+   [settings-item-separator]
    [profile-info-phone-item phone]])
 
 (defn save-profile! []
@@ -198,28 +200,23 @@
   [react/view {}
    [react/touchable-highlight
     {:on-press navigate-to-accounts}
-    [react/view
+    [react/view styles/settings-item-text
      [react/text {:style      styles/logout-text
                   :font       (if platform/android? :medium :default)}
       (label :t/logout)]]]])
 
-(defn my-profile-info [{:keys [public-key status phone] :as contact}]
+(defn my-profile-settings [{:keys [public-key status phone network networks] :as contact}]
   [react/view
-   [profile-info-address-item contact]
-   [info-item-separator]
-   [profile-info-public-key-item public-key contact]
-   [info-item-separator]
-   [profile-info-phone-item
-    phone
-    [{:value #(dispatch [:my-profile/update-phone-number])
-      :text  (label :t/edit)}]]
-   [info-item-separator]
-   [network-settings]
+   [settings-title "Settings"]
+   [settings-item :t/main-currency "USD" #() false]
+   [settings-item-separator]
+   [settings-item :t/notifications "" #() true]
+   [settings-item-separator]
+   [settings-item :t/network-settings (get-in networks [network :name]) #(dispatch [:navigate-to :network-settings]) true]
    (when config/offline-inbox-enabled?
-     [info-item-separator])
+     [settings-item-separator])
    (when config/offline-inbox-enabled?
-     [offline-messaging-settings])
-   [logout]])
+     [settings-item :t/offline-messaging-settings "" #(dispatch [:navigate-to :offline-messaging-settings]) true])])
 
 (defn profile-status [status & [edit?]]
   [react/view styles/profile-status-container
@@ -239,25 +236,30 @@
    [common/network-info]
    [common/separator]])
 
+(defn share-contact-code [current-account public-key]
+  [react/touchable-highlight {:on-press (show-qr current-account :public-key public-key)}
+   [react/view styles/share-contact-code
+    [react/view styles/share-contact-code-text-container
+     [react/text {:style styles/share-contact-code-text}
+      "Share my contact code"]]
+    [react/view styles/share-contact-icon-container
+     [vector-icons/icon :icons/qr {:color component.styles/color-blue4}]]]])
+
 (defview my-profile []
   (letsubs [{:keys [status public-key] :as current-account} [:get-current-account]]
     [react/view styles/profile
      [my-profile-toolbar]
-     [network-info]
+     #_[network-info]
      [react/scroll-view
       [react/view styles/profile-form
        [profile-badge current-account]
-       [profile-status status true]]
-      [common/form-spacer]
+       #_[profile-status status true]]
       [react/view actions-list
-       [action-button {:label     (label :t/show-qr)
-                       :icon      :icons/qr
-                       :icon-opts {:color :blue}
-                       :on-press  (show-qr current-account :public-key public-key)}]]
-      [common/form-spacer]
+       [share-contact-code current-account public-key]]
       [react/view styles/profile-info-container
-       [my-profile-info current-account]
-       [common/bottom-shadow]]]]))
+       [my-profile-settings current-account]
+       #_[common/bottom-shadow]]
+      [logout]]]))
 
 (defview profile []
   (letsubs [{:keys [pending?

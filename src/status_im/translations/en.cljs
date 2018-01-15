@@ -83,7 +83,9 @@
    ;;profile
    :profile                               "Profile"
    :edit-profile                          "Edit profile"
+   :main-currency                         "Main currency"
    :message                               "Message"
+   :notifications                         "Notifications"
    :not-specified                         "Not specified"
    :public-key                            "Public key"
    :phone-number                          "Phone number"
@@ -379,7 +381,7 @@
    :error-processing-json                 "Error processing JSON"
    :rpc-url                               "RPC URL"
    :remove-network                        "Remove network"
-   :network-settings                      "Network settings"
+   :network-settings                      "Network"
    :offline-messaging-settings            "Offline messages settings"
    :edit-network-warning                  "Be careful, editing the network data may disable this network for you"
    :connecting-requires-login             "Connecting to another network requires login"

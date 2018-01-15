@@ -12,9 +12,13 @@
             [status-im.utils.platform :as platform])
   (:require-macros [status-im.utils.styles :refer [defstyle]]))
 
+(def toolbar-edit-text
+  {:font-size     16
+   :padding-right 16})
+
 (def profile
   {:flex             1
-   :background-color color-light-gray
+   :background-color color-white
    :flex-direction   :column})
 
 (def profile-form
@@ -52,7 +56,8 @@
    :max-height       114})
 
 (def profile-badge
-  {:flex-direction :row})
+  {:flex-direction :column
+   :align-items    :center})
 
 (def edit-profile-badge
   {:flex-direction :row
@@ -107,11 +112,12 @@
   {:flex          1
    :padding-right (if options 16 40)})
 
-(defstyle profile-setting-title
-  {:color   color-gray4
-   :ios     {:font-size      14
-             :letter-spacing -0.2}
-   :android {:font-size 12}})
+(defstyle profile-settings-title
+  {:color       color-gray4
+   :margin-left 16
+   :ios         {:font-size      14
+                 :letter-spacing -0.2}
+   :android     {:font-size 12}})
 
 (defstyle profile-setting-text
   {:ios     {:font-size      17
@@ -134,16 +140,15 @@
   (merge profile-setting-text
          {:color color-gray4}))
 
-(def info-item-separator
+(def settings-item-separator
   {:margin-left 16})
 
-(defstyle network-settings
+(defstyle settings-item
   {:padding-horizontal 16
    :flex-direction     :row
    :align-items        :center
    :background-color   color-white
-   :android            {:height 72}
-   :ios                {:height 64}})
+   :height             52})
 
 (defstyle offline-messaging-settings
   {:padding-horizontal 16
@@ -153,7 +158,7 @@
    :android            {:height 72}
    :ios                {:height 64}})
 
-(def network-settings-text
+(def settings-item-text
   (merge {:flex 1}
          profile-setting-text))
 
@@ -221,3 +226,29 @@
          {:color color-gray4}))
 
 (def network-info {:background-color :white})
+
+(def share-contact-code
+  {:margin-horizontal 16
+   :flex-direction    :row
+   :justify-content   :space-between
+   :align-items       :center
+   :height            42
+   :border-radius     4
+   :background-color  styles/color-blue4-transparent})
+
+(def share-contact-code-text-container
+  {:padding-left    16
+   :flex            0.9
+   :flex-direction  :row
+   :justify-content :center
+   :align-items     :center})
+
+(def share-contact-code-text
+  {:color     styles/color-blue4
+   :font-size 15})
+
+(def share-contact-icon-container
+  {:border-radius   50
+   :flex            0.1
+   :align-items     :center
+   :justify-content :center})
