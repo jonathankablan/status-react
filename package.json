@@ -46,7 +46,7 @@
     "re-natal": "0.8.0",
     "react": "^16.0.0",
     "react-dom": "16.0.0",
-    "react-native": "^0.51.0",
+    "react-native": "^0.60.0",
     "react-native-action-button": "2.8.1",
     "react-native-android-sms-listener": "github:adrian-tiberius/react-native-android-sms-listener#listener-bugfix",
     "react-native-autolink": "1.1.1",
